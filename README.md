@@ -1,7 +1,28 @@
 # appview 
 
-## Dynamic Application view
-Build  application/infrastructure view 
+## Install Instructions to build DB instance named *test* located under  */testdb/*
+### 
+* `cp ifxdb ifxdb ifxdb_create /usr/local/bin/`
+
+### Create Directory structure 
+* `mkdir /etc/db_config/ 
+* `mkdir /ifxlogs/
+* `mkdir /testdb`
+
+###  Create configuration file 
+* `echo "/testdb/" > db_test.conf`
+
+###  Create database instance
+* `cd /testdb`
+* `/usr/local/bin/ifxdb_create 4`
+
+### Start Database 
+*  `/usr/local/bin/ifxdb test`
+
+### Test 
+*  `/usr/local/bin/ifxad test select pools from TABLES`
+
+# Build  application/infrastructure view 
 
 ### Monitor Application 
 * Non-intrusive application monitor 
