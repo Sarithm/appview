@@ -1,16 +1,17 @@
 # appview 
 
-## Install Instructions to build DB instance named *test* located under  */testdb/*
-### 
-* `cp ifxdb ifxdb ifxdb_create /usr/local/bin/`
+## Install Instructions
+### ifxdb instance name : test & database path : /testdb/
+* `make all`
+* `cp ifxdb ifxad ifxdb_create /usr/local/bin/`
 
 ### Create Directory structure 
-* `mkdir /etc/db_config/ 
-* `mkdir /ifxlogs/
+* `mkdir /etc/db_config/`
+* `mkdir /ifxlogs/`
 * `mkdir /testdb`
 
 ###  Create configuration file 
-* `echo "/testdb/" > db_test.conf`
+* `echo "/testdb/" > /etc/db_config/db_test.conf`
 
 ###  Create database instance
 * `cd /testdb`
