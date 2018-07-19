@@ -478,7 +478,7 @@ char msg[13][30]=
    "access denied" };
 
 	code--; if(code<0 || code>13) code=9;
-	fprintf(stderr," ifxad -- %s\n",msg[code]);
+	fprintf(stderr," ifxshell -- %s\n",msg[code]);
 	exit(4);
 }
 
@@ -519,7 +519,7 @@ char	mode_key[4][8]=
 };
 	
 int	sock;
-int	NN=8,uid;
+int	NN=8;
 int	NB,type,size;
 
 char	name[50];
@@ -639,14 +639,13 @@ char	f_conf_name[60]="/etc/db_config/db_name_";
 	if(strncmp(t_name,t_name_prev,22)!=0)
 	  {
 		sock=socket(AF_INET,SOCK_STREAM,0);
-		if(connect(sock, (struct sockaddr *)&server,sizeof(server))<0)	 err(7);
+		if(connect(sock, (struct sockaddr *)&server,sizeof(server))<0)	err(7);
 		IT=get_tables(sock);
 		close(sock);
 	  }
 	strcpy(t_name_prev,t_name);
 	if(IT<1000 && ( (TQ==0) || check_tables()<0))			err(5);
 	code=0;
-	if(j>0&&uid!=0)			err(8);
 	if(j==0&&IT==1000) code=3; else 	/* getting TABLES  */
 	if(j==0&&IT<1000) code=22; else		/* getting records */
 	if(j==3&&IT<1000) code=21; else		/* insert record   */
