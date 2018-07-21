@@ -1,4 +1,7 @@
 #
+
+testrun: test_run201.c
+	gcc -o testrun  test_run201.c
 ifxad:	ifxad_v103.c
 	gcc -o ifxad ifxad_v103.c
 
@@ -10,8 +13,11 @@ ifxcreate: ifxdb_create.c
 
 ifxutil: ifxdb_util.c
 	gcc -o ifxdb_util  ifxdb_util.c
+ifxs: ifxshell_v103.c
+	gcc -o ifxs ifxshell_v103.c
 
 all:
+	make ifxs
 	make ifxdb
 	make ifxutil
 	make ifxcreate
