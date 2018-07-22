@@ -28,7 +28,7 @@ struct	Nlink
 	unsigned int	l_ip,r_ip;
 	unsigned short	int l_port,r_port;
 	unsigned int	inode;
-} 	Nlinks[1000];
+} 	Nlinks[5000];
 
 
 int	main(int argc,char *argv[])
@@ -184,9 +184,7 @@ char	f_link[100];
 				 {
 				   if(Nlinks[i].inode==Inode)
 				    {
-					fprintf(stdout,"%u %s %u       %u %u %u %u\n",
-					 pid,name,Rtime,
-					 Nlinks[i].l_ip,Nlinks[i].l_port,Nlinks[i].r_ip,Nlinks[i].r_port);
+					fprintf(stdout,"%u %s %u       %u %u %u %u\n", pid,name,Rtime,Nlinks[i].l_ip,Nlinks[i].l_port,Nlinks[i].r_ip,Nlinks[i].r_port);
 				    }
 				 }
 			  }
