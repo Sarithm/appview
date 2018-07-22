@@ -22,14 +22,20 @@
 
 #define	TCPF_ALL 0xFFF
 
-int	NLnumber;
+int	NLnumber,NListener;
 struct	Nlink
 {	
 	unsigned int	l_ip,r_ip;
 	unsigned short	int l_port,r_port;
 	unsigned int	inode;
-} 	Nlinks[5000];
+} 	Nlinks[20000];
 
+struct	Listener
+{
+	unsigned int	ls_ip;
+	unsigned short int	ls_port;
+	unsigned short int	connect;
+}	Listener[2000];
 
 int	main(int argc,char *argv[])
 {
@@ -41,9 +47,9 @@ char	dir_path[512];
 char	d1_path[512];
 char	f_path[512];
 char	buf[512];
-char	*p;
+char	*p,*p1;
 char	name[40];
-int	i,Ok;
+int	i,j,Ok;
 int	TCK;
 unsigned int	pid,ppid,Inode;
 unsigned long	utime,stime,Rtime,vsize,rss;
@@ -60,12 +66,14 @@ struct	inet_diag_msg	*diag_msg;
 char	ip1[30],ip2[30];
 uint8_t	recv_buf[8192];
 char	f_link[100];
+char	NCODE;
 
 	TCK=sysconf(_SC_CLK_TCK);
 	sysinfo(&SysInfo);
 
-	NLnumber=0;
+	NLnumber=0; NListener=0;
 	bzero((void *)Nlinks,sizeof(Nlinks));
+	bzero((void *)Listener,sizeof(Listener));
 
 	netl_sock=socket(AF_NETLINK,SOCK_DGRAM,NETLINK_INET_DIAG);
 	if(netl_sock<0) { fprintf(stdout,"NETLINK socket %i\n",errno); exit(4); }
@@ -104,12 +112,26 @@ char	f_link[100];
 		len=(*nlp).nlmsg_len-NLMSG_LENGTH(sizeof(diag_msg));
 		if((*diag_msg).idiag_family==AF_INET)
 		  {
-			Nlinks[NLnumber].l_ip=(*diag_msg).id.idiag_src[0];
-			Nlinks[NLnumber].r_ip=(*diag_msg).id.idiag_dst[0];
+		    if(NLnumber<20000)
+		      {
+			Nlinks[NLnumber].l_ip=ntohl((*diag_msg).id.idiag_src[0]);
+			Nlinks[NLnumber].r_ip=ntohl((*diag_msg).id.idiag_dst[0]);
 			Nlinks[NLnumber].l_port=ntohs((*diag_msg).id.idiag_sport);
 			Nlinks[NLnumber].r_port=ntohs((*diag_msg).id.idiag_dport);
 			Nlinks[NLnumber].inode=(*diag_msg).idiag_inode;
+			if(Nlinks[NLnumber].r_ip==0 && Nlinks[NLnumber].r_port==0)
+			  {
+			    for(i=0;i<NListener;i++)
+			     if(Listener[i].ls_ip==Nlinks[NLnumber].l_ip && Listener[i].ls_port==Nlinks[NLnumber].l_port) break;
+			    if(i==NListener && NListener<10000)
+			     {
+				Listener[i].ls_ip=Nlinks[NLnumber].l_ip;
+				Listener[i].ls_port=Nlinks[NLnumber].l_port;
+				NListener++;
+			     }
+			  }
 			NLnumber++;
+		      }
 		  }
 		else
 		  {
@@ -119,6 +141,11 @@ char	f_link[100];
 	     }
 	 }
 	
+/*
+	for(i=0;i<NListener;i++)
+	 fprintf(stderr,"LL %u %u\n",Listener[i].ls_ip,Listener[i].ls_port);
+*/
+
 	DD=opendir("/proc");
 	if(DD==NULL) { fprintf(stderr,"DD is NULL,%i\n",errno); exit(4); }
 
@@ -135,7 +162,10 @@ char	f_link[100];
 				bzero(buf,256);
 				fgets(buf,256,fp);
 				p=strtok(buf,"\t "); pid=atol(p);
-				p=strtok(0,"\t "); strncpy(name,p,40);
+				p=strtok(0,"\t "); p++; p1=name; i=0;
+				while(*p!=')' && *p!=0 && i<40) *(p1++)=*(p++); *p1=0;
+				
+			/* 	 strncpy(name,p,40); */
 				p=strtok(0,"\t "); p=strtok(0,"\t ");
 				ppid=atol(p);
 
@@ -184,7 +214,21 @@ char	f_link[100];
 				 {
 				   if(Nlinks[i].inode==Inode)
 				    {
-					fprintf(stdout,"%u %s %u       %u %u %u %u\n", pid,name,Rtime,Nlinks[i].l_ip,Nlinks[i].l_port,Nlinks[i].r_ip,Nlinks[i].r_port);
+				      if(Nlinks[i].r_ip==0 && Nlinks[i].r_port==0)
+				       {
+					NCODE='L';
+				       }
+				      else
+				       {
+					  for(j=0;j<NListener;j++)
+					    if(Nlinks[i].l_port==Listener[j].ls_port &&
+						(Listener[j].ls_ip==0 || Nlinks[i].l_ip==Listener[j].ls_ip) )  break;
+					    if(j<NListener)
+						NCODE='S';
+					    else NCODE='C';
+				       }
+				      fprintf(stdout,"%u %s %u %c   %u %u %u %u\n",
+				        pid,name,Rtime,NCODE,Nlinks[i].l_ip,Nlinks[i].l_port,Nlinks[i].r_ip,Nlinks[i].r_port);
 				    }
 				 }
 			  }
