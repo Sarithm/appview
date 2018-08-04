@@ -1,7 +1,7 @@
 #
 
-testrun: test_run201.c
-	gcc -o testrun  test_run201.c
+testrun: test_run331.c
+	gcc -o testrun  test_run331.c
 ifxad:	ifxad_v103.c
 	gcc -o ifxad ifxad_v103.c
 
